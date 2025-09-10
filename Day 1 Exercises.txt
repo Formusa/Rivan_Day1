@@ -1,0 +1,208 @@
+Recipe to Conf SVI
+1. Specify IP Add
+2. Setup VLANs
+3. Make sure VLANs are ON
+
+
+___________________________________________________________________
+@CoreTAAS
+conf t 
+ int vlan 10
+  ip add 10.92.10.2 255.255.255.0
+  description WIFI-VLAN
+  no shutdown
+  end 
+
+conf t 
+ int vlan 50
+  ip add 10.92.50.2
+  description CCTV-VLAN
+  no shutdown 
+  end
+
+conf t
+ int vlan 100
+  ip add 10.92.100.2
+  description VOICE-VLAN
+  no shutdown
+  end
+ ___________________________________________________________________
+
+
+
+Exercise No.4
+
+!@CoreBABA
+conf t
+ ip dhcp excluded-address 10.92.100.1  10.92.100.100
+ ip dhcp pool POOLVOICE
+  network 10.92.50.0 255.255.255.0
+  default-router 10.92.100.4
+  domain-name VOICEDATA.COM
+  dns-server 10.92.1.10
+  option 150  ip 10.92.100.8
+  lease 5 0 0
+  end
+
+
+LEASE TIME 1 2 3 ( 1 - Days  2 - Hrs 3 - Mins)
+
+CREATING Cam VLAN
+
+conf t
+ vlan 50
+ name CCTVLAN
+ exit
+
+int fa0/6
+ switchport mode access
+ switchport access vlan 50
+ exit
+int fa0/8
+ switchport mode access
+ switchport access vlan 50
+ end
+ 
+__________________________________
+MAC addresses
+fa0/6: 001a.0709.bd03
+
+fa0/8: 001a.070b.4716
+
+fa0/5: e8ed.f3a9.8feb
+
+fa0/7: 203a.0783.6b15
+__________________________________
+
+conf t
+ ip routing
+ ip dhcp pool CAMERA6
+  host 10.92.50.6 255.255.255.0
+  client-identifier 001a.0709.bd03
+ ip dhcp pool CAMERA8
+  host 10.92.50.8 255.255.255.0
+  client-identifier 001a.070b.4716
+ end
+
+______________________________________________________
+
+ASSIGNING Mac Add to Phones
+!@CUCM
+conf t
+telephony-service
+create cnf-files
+ ephone-dn 1
+  number 9211
+ ephone-dn 2
+  number 9222
+ ephone-dn 3
+  number 9233
+ ephone-dn 4
+  number 9244
+ ephone-dn 5
+  number 9255
+ ephone-dn 6
+  number 9266
+ ephone-dn 7
+  number 9277
+ ephone-dn 8
+  number 9288
+ ephone-dn 9
+  number 9299
+ ephone 1
+  mac-address e8ed.f3a9.8feb
+  type 8945
+  button 1:1 2:2 3:3 4:4
+ ephone 2
+  mac-address 203a.0783.6b15
+  type 8945
+  button 1:5 2:6 3:7 4:8
+  end
+____________________________________________________________
+Exercise 7
+conf t
+hostname EDGE-92
+enable secret pass
+service password-encryption
+no logging console
+no ip domain lookup 
+end
+____________________________________________________________
+Exercise 8
+protect console
+
+conf t
+ line console 0 
+ password pass
+ login 
+ exec-timeout 30 30
+ end
+Remote Access
+conf t 
+ line vty 0 14
+ password pass
+ login
+ exec-timeout 720
+ end
+
+__________________________________________________________
+Practice Exercises
+VLAN 10
+@D1
+conf t
+ ip dhcp excluded-address 10.2.1.1 10.2.1.100
+ ip dhcp pool ccnapool
+  network 10.2.1.0 255.255.255.0
+  default-router 10.2.1.1
+  dns-server 10.92.1.10
+  domain-name ccna.com
+  end
+
+@A1
+conf t
+ interface e0/0
+  switchport mode access
+  switchport access vlan 10
+  end
+
+@P1
+conf t
+ interface e0/0
+  no shutdown
+  ip add dhcp
+  end
+
+VLAN 20
+@D2
+conf t
+ ip dhcp excluded-address 10.2.1.1 10.2.1.100
+ ip dhcp pool ccnapool
+  network 10.2.1.0 255.255.255.0
+  default-router 10.2.2.1
+  dns-server 10.92.1.10
+  domain-name ccna.com
+  end
+
+@A2
+conf t
+ interface e1/0
+  switchport mode access
+  switchport access vlan 20
+  end
+
+@P2
+conf t
+ interface e1/0
+  no shutdown
+  ip add dhcp
+  end
+_____________________________________________________________________
+
+set-netfirewallprofile -name public.privatedomain -enabled
+______________________________________________________________________
+Summary for DAY 1 Configuration;Scripts only Txt
+CoreTaas Line 37 - 67
+CoreBABA Line 69 - 195
+CUCM Line 199 - 290 and 292 - 378
+Edge Line 382 - 440
+PC (CMD) Line 443 - 444
